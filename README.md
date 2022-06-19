@@ -1,24 +1,30 @@
-# Question-to-Actions for AssistQ
+## Winning the CVPR'22 LOVEU-AQTC challenge: 
 
-This repo provides a baseline model for our proposed task: AssistQ: Affordance-centric Question-driven Task Completion for Egocentric Assistant. 
+### A Two-stage Function-centric Approach
 
-[[Page]](https://showlab.github.io/assistq/)  [[Paper]](https://arxiv.org/abs/2203.04203)   [[LOVEU@CVPR'22 Challenge]](https://sites.google.com/view/loveucvpr22/track-3?authuser=0) [[CodaLab Leaderboard]](https://codalab.lisn.upsaclay.fr/competitions/4642#results)
+This repo provides the 1st place solution(code and checkpoint) of the CVPR'22 LOVEU-AQTC challenge.
+
+[[Challenge Page]](https://showlab.github.io/assistq/)  [[Challenge Paper]](https://arxiv.org/abs/2203.04203)  [[Our paper]]() [[LOVEU@CVPR'22 Challenge]](https://sites.google.com/view/loveucvpr22/track-3?authuser=0) [[CodaLab Leaderboard]](https://codalab.lisn.upsaclay.fr/competitions/4642#results)
 
 Click to know the task:
 
 [![Click to see the demo](https://img.youtube.com/vi/3v8ceel9Mos/0.jpg)](https://www.youtube.com/watch?v=3v8ceel9Mos)
 
-Model Architecture (see [[Paper]](https://arxiv.org/abs/2203.04203) for details):
+Model Architecture (see [[Our Paper]]() for details):
 
-![arch](https://user-images.githubusercontent.com/20626415/162197041-f1b06325-098c-448a-9b65-d746d8bfe08d.png)
+![image-20220619201014430](https://raw.githubusercontent.com/starsholic/pic/main/image-20220619201014430.png)
 
 
 ## Install
+
 (1) PyTorch. See https://pytorch.org/ for instruction. For example,
+
 ```
 conda install pytorch torchvision torchtext cudatoolkit=11.3 -c pytorch
 ```
+
 (2) PyTorch Lightning. See https://www.pytorchlightning.ai/ for instruction. For example,
+
 ```
 pip install pytorch-lightning
 ```
@@ -31,33 +37,35 @@ Then carefully set your data path in the config file ;)
 
 ## Encoding
 
-Before starting, you should encode the instructional videos, scripts, QAs. See [encoder.md](https://github.com/showlab/Q2A/blob/master/encoder/README.md).
+Before starting, you should encode the instructional videos, scripts, paras, QAs. See [encoder.md](https://github.com/showlab/Q2A/blob/master/encoder/README.md).
 
 ## Training & Evaluation
 
 Select the config file and simply train, e.g.,
 
 ```
-CUDA_VISIBLE_DEVICES=0 python train.py --cfg configs/q2a_gru+fps1+maskx-1_vit_b16+bert_b.yaml
+CUDA_VISIBLE_DEVICES=0 python train.py --cfg configs/q2a_vit_xlnet.yaml
 ```
 
 To inference a model, e.g.,
 
 ```
-CUDA_VISIBLE_DEVICES=0 python inference.py --cfg configs/q2a_gru+fps1+maskx-1_vit_b16+bert_b.yaml CKPT "outputs/q2a_gru+fps1+maskx-1_vit_b16+bert_b/lightning_logs/version_0/checkpoints/epoch=5-step=155.ckpt"
+CUDA_VISIBLE_DEVICES=0 python inference.py --cfg configs/q2a_vit_xlnet.yaml CKPT "outputs/q2a_vit_xlnet/lightning_logs/version_0/checkpoints/epoch=5-step=155.ckpt"
 ```
 
 
 The evaluation will be performed after each epoch. You can use Tensorboard, or just terminal outputs to record evaluation results.
 
-## Baseline Performance for LOVEU@CVPR2022 Challenge: 80 videos' QA samples for training, 20 videos' QA samples for testing
+## Function-centric Approach Performance for LOVEU@CVPR2022 Challenge: 80 videos' QA samples for training, 20 videos' QA samples for testing
 
-|  Model   | Recall@1 ↑ | Recall@3 ↑ | MR (Mean Rank) ↓ | MRR (Mean Reciprocal Rank) ↑ |
-|  ----  |  ----  |  ----  |  ----  |  ----  |
-| Q2A ([configs/q2a_gru+fps1+maskx-1_vit_b16+bert_b.yaml](configs/q2a_gru+fps1+maskx-1_vit_b16+bert_b.yaml)) | 30.2 | 62.3 | 3.2 | 3.2 |
+| Model                                                        | Recall@1 ↑ | Recall@3 ↑ | MR (Mean Rank) ↓ | MRR (Mean Reciprocal Rank) ↑ |
+| ------------------------------------------------------------ | ---------- | ---------- | ---------------- | ---------------------------- |
+| Function-centric ([configs/q2a_vit_xlnet.yaml](configs/q2a_cit_xlnet.yaml)) | 44.8       | 75.4       | 2.6              | 3.9                          |
 
-![image](https://user-images.githubusercontent.com/20626415/166685483-7c39c6e3-8d3d-43a2-a431-58bdcf67cc16.png)
+We obtained better results after the competition deadline as shown above.
+
+![image-20220619193605180](https://raw.githubusercontent.com/starsholic/pic/main/image-20220619193605180.png)
 
 ## Contact
 
-Feel free to contact us if you have any problems: joyachen97@gmail.com, or leave an issue in this repo.
+Feel free to contact us if you have any problems: dwustc@mail.ustc.edu.com, or leave an issue in this repo.
