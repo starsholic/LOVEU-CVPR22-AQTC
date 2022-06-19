@@ -1,4 +1,4 @@
-# Q2A Encoder
+# Function-centric Encoder
 
 1. Follow [LOVEU-CVPR22-AQTC/README.md](https://github.com/starsholic/LOVEU-CVPR22-AQTC/blob/main/README.md) to install required libraries and dataset.
 

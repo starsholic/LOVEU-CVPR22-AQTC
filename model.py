@@ -136,97 +136,11 @@ class Q2A(nn.Module):
             return results
 
 
-# class Q2A_ranking(nn.Module):
-#     def __init__(self, cfg) -> None:
-#         super().__init__()
-#         self.mlp_v = MLP(cfg.INPUT.DIM, cfg.INPUT.DIM)
-#         self.mlp_t = MLP(cfg.INPUT.DIM, cfg.INPUT.DIM)
-#         self.mlp_inputs_pre = MLP(cfg.INPUT.DIM*4, cfg.INPUT.DIM)
-#         self.mlp_anchor_pre = MLP(cfg.INPUT.DIM*3, cfg.INPUT.DIM)
-
-#         self.s2v = nn.MultiheadAttention(cfg.INPUT.DIM, cfg.MODEL.NUM_HEADS)
-#         self.qa2s = nn.MultiheadAttention(cfg.INPUT.DIM, cfg.MODEL.NUM_HEADS)
-
-#         self.state = torch.randn(cfg.MODEL.DIM_STATE, device="cuda")
-#         if cfg.MODEL.HISTORY.ARCH == "mlp":
-#             pass
-#         elif cfg.MODEL.HISTORY.ARCH == "gru":
-#             self.gru = nn.GRUCell(cfg.MODEL.DIM_STATE, cfg.MODEL.DIM_STATE)
-#         else:
-#             assert False, "unknown arch"
-        
-#         self.history_train = cfg.MODEL.HISTORY.TRAIN
-#         self.history_val = cfg.MODEL.HISTORY.VAL
-#         self.cfg = cfg
-
-#     def forward(self, batch):
-#         loss, count = 0, 0
-#         results = []
-#         for video, script, question, actions, label, meta in batch:
-#             video = self.mlp_v(video) 
-#             script = self.mlp_t(script)
-#             video = self.s2v(script.unsqueeze(1), video.unsqueeze(1), video.unsqueeze(1))[0].squeeze_()
-#             question = self.mlp_t(question)
-            
-#             state = self.state
-#             seq_input = self.mlp_anchor_pre(torch.cat([video, question, script], dim=1))
-#             scores = []
-#             for i, actions_per_step in enumerate(actions):
-#                 a_texts, a_buttons = zip(*[(action['text'], action['button']) for action in actions_per_step])
-#                 a_texts = self.mlp_t(torch.cat(a_texts))
-#                 A = len(a_buttons)
-#                 a_buttons = self.mlp_v(
-#                     torch.stack(a_buttons).view(A, -1, a_texts.shape[1])
-#                 ).view(A, -1) 
-#                 # a = torch.cat((a_texts, a_buttons), dim=1)
-#                 qa = question + a_texts
-#                 qa_script, qa_script_mask = self.qa2s(
-#                     qa.unsqueeze(1), script.unsqueeze(1), script.unsqueeze(1)
-#                 )
-#                 qa_video = qa_script_mask @ video
-
-#                 # ablation via changing inputs and anchor: a_texts/a_buttons/question/video/script combination
-#                 inputs = torch.cat(
-#                     [qa_video.view(A, -1), qa_script.view(A, -1), qa.view(A, -1), a_buttons.view(A, -1)],
-#                     dim=1
-#                 )
-#                 inputs = self.mlp_inputs_pre(inputs)
-        
-#                 # inputs = torch.cat(
-#                 #     [qa_video.view(A, -1), qa_script.view(A, -1), qa.view(A, -1), a_buttons.view(A, -1)],
-#                 #     dim=1
-#                 # )
-
-#                 if self.training:
-#                     negative = inputs[torch.arange(A)!=label[i].cpu()]
-#                     positive = inputs[label[i]]
-#                 else:
-#                     candidates_score = torch.pairwise_distance(inputs, state)
-#                     positive = inputs[candidates_score.argmax()]
-#                     negative = inputs[torch.arange(A)!=candidates_score.argmax().cpu()]
-
-#                 state = self.gru(seq_input.squeeze(0), state)
-#                 seq_input = positive
-
-#                 if self.training:
-#                     loss += F.triplet_margin_with_distance_loss(state, positive, negative)
-#                     count += 1
-#                 else:
-#                     scores.append(candidates_score.tolist())
-#             if not self.training:
-#                 meta["scores"] = scores
-#                 results.append(meta)
-#         if self.training:
-#             return loss / count
-#         else:
-#             return results
-
 class Q2A_para(nn.Module):
     def __init__(self, cfg) -> None:
         super().__init__()
         self.mlp_v = MLP(cfg.INPUT.DIM, cfg.INPUT.DIM)
         self.mlp_t = MLP(cfg.INPUT.DIM, cfg.INPUT.DIM)
-        # self.mlp_pre = MLP(cfg.INPUT.DIM*(3+cfg.INPUT.NUM_MASKS), cfg.MODEL.DIM_STATE)
         self.mlp_pre = MLP(cfg.INPUT.DIM*4, cfg.MODEL.DIM_STATE)
         
         self.state = torch.randn(cfg.MODEL.DIM_STATE, device="cuda")
@@ -240,6 +154,8 @@ class Q2A_para(nn.Module):
         
         self.history_train = cfg.MODEL.HISTORY.TRAIN
         self.history_val = cfg.MODEL.HISTORY.VAL
+        
+        self.function_centric = cfg.MODEL.FUNCTION_CENTRIC
         self.cfg = cfg
 
     def forward(self, batch):
@@ -250,7 +166,6 @@ class Q2A_para(nn.Module):
             para_score = torch.tensor(meta['paras_score']).softmax(dim=0).cuda()
 
             video = self.mlp_v(video)
-            self.function_centric = False
 
             if self.function_centric:
                 if meta['folder'] == 'vacuum_1csuz':
@@ -305,8 +220,6 @@ class Q2A_para(nn.Module):
                         [video_sent.expand_as(qa), script.expand_as(qa), qa.view(A, -1), a_buttons.view(A, -1)],
                         dim=1
                     )
-
-
 
                 inputs = self.mlp_pre(inputs)
                 if hasattr(self, "gru"):
