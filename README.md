@@ -58,7 +58,7 @@ The evaluation will be performed after each epoch. You can use Tensorboard, or j
 To inference out best model, please download the checkpoint [here](https://drive.google.com/file/d/1nfgQLFE3ehiPeazSCMLavlUsAxoykH6C/view?usp=sharing), then
 
 ```
-CUDA_VISIBLE_DEVICES=0 python inference.py --cfg configs/q2a_vit_xlnet.yaml CKPT ""
+CUDA_VISIBLE_DEVICES=0 python inference.py --cfg configs/q2a_vit_xlnet.yaml CKPT "epoch=91-step=2392.ckpt"
 ```
 
 ## Function-centric Approach Performance for LOVEU@CVPR2022 Challenge: 80 videos' QA samples for training, 20 videos' QA samples for testing
