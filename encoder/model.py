@@ -1,9 +1,8 @@
-import numpy as np
 import torch
 from torch import nn
 from pytorch_lightning import LightningModule
 import timm, os
-from transformers import AutoModel, AutoTokenizer
+from transformers import AutoModel
 
 class Encoder(LightningModule):
     def __init__(self, cfg):
@@ -24,11 +23,11 @@ class Encoder(LightningModule):
         if self.for_video:
             video, path = batch[0] 
             # set smaller batch size to prevent OOM
-            features = torch.cat([
-                self.vision_model(frame.unsqueeze(0))
-                for frame in video
-            ])
-            # features = self.vision_model(video)
+            # features = torch.cat([
+            #     self.vision_model(frame.unsqueeze(0))
+            #     for frame in video
+            # ])
+            features = self.vision_model(video)
             if not os.path.exists(path):
                 os.makedirs(path)
             torch.save(features, os.path.join(path, "video.pth"))
@@ -37,7 +36,6 @@ class Encoder(LightningModule):
             script, timestamps, path = batch[0]
             if not os.path.exists(path):
                 os.makedirs(path)
-            # print('sentece shape:', self.text_model(script[0]).shape)
             features = torch.cat([self.text_model(**sentence).last_hidden_state[:,-1,:] for sentence in script])
             torch.save([timestamps, features], os.path.join(path, "script.pth"))
 

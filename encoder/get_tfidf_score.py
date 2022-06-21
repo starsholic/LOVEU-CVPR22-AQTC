@@ -2,9 +2,6 @@ import json
 import re
 import os
 from copy import deepcopy
-import cv2
-from collections import Counter, defaultdict
-from itertools import product
 import numpy as np
 import nltk
 from nltk.tokenize import word_tokenize
@@ -109,31 +106,28 @@ def question_to_sentence(sentences, qa_pair):
 def question_to_para(paras, qa_pair):
     paras = [word_tokenize(remove(para)) for para in paras]
     model = TF_IDF_Model(paras)
-    # for qa_pair in qa_pairs:
     question = word_tokenize(remove(qa_pair['question']))
     scores = model.get_documents_score(question)
-    # para_index = scores.index(max(scores))
     return scores
 
 
 if __name__ == "__main__":    
-    ann_paths = ['/data/wushiwei/data/assistq/assistq_test/test_without_gt.json', '/data/wushiwei/data/assistq/assistq_train/train.json']
-    data_paths = ['/data/wushiwei/data/assistq/assistq_test/test', '/data/wushiwei/data/assistq/assistq_train/train']
-    save_paths = ['/data/wushiwei/data/assistq/assistq_test/test_without_gt_with_para.json', '/data/wushiwei/data/assistq/assistq_train/train_with_para.json']
+    paths = ['/data/wushiwei/data/assistq/assistq_test', '/data/wushiwei/data/assistq/assistq_train']
+    names = ['test_without_gt', 'train']
 
-    for ann_path, data_path, save_path in zip(ann_paths, data_paths, save_paths):
-        with open(ann_path, 'r') as f:
+    for path, name in zip(paths, names):
+        with open(os.path.join(path, name+'.json'), 'r') as f:
             ann = json.load(f)
-        ann_refine = deepcopy(ann)
-
+        ann_with_score = deepcopy(ann)
+        data_path = os.path.join(path, path.split('_')[-1])
+        
         for sample in ann:
             sentences = get_sentences(sample, data_path)
             paras, paras_timestamps = get_paras(sample, data_path)
             with open(os.path.join(data_path, sample, 'paras.json'), 'w') as f:
                 json.dump([paras_timestamps, paras], f)
-            ann_refine['paras'] = paras
             qa_pairs = ann[sample]
-            qa_pairs_refine = ann_refine[sample]
+            qa_pairs_refine = ann_with_score[sample]
             for qa_pair, qa_pair_refine in zip(qa_pairs, qa_pairs_refine):
                 paras_score = question_to_para(paras, qa_pair)
                 sents_score = question_to_sentence(sentences, qa_pair)
@@ -142,5 +136,5 @@ if __name__ == "__main__":
                 qa_pair_refine['sents_score'] = sents_score
                 qa_pair_refine['paras_score'] = paras_score
 
-        with open(save_path, 'w') as f:
-            json.dump(ann_refine, f)
+        with open(os.path.join(path, name+'_with_score.json'), 'w') as f:
+            json.dump(ann_with_score, f)

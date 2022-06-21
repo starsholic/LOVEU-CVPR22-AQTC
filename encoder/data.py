@@ -42,7 +42,6 @@ class RawAssistQA(Dataset):
             T.Normalize(mean=config['mean'], 
             std=config['std'])
         ])
-        # self.frame_transform = create_transform(**config)
         self.tokenizer = AutoTokenizer.from_pretrained(cfg.MODEL.TEXT)
 
         self.fps = cfg.INPUT.FPS

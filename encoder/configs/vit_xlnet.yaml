@@ -1,7 +1,7 @@
 DATASET: 
   ROOT: "/data/chenjoya/assistq"
   SPLIT: "train"
-  LABEL: "train.json"
+  LABEL: "train_with_score.json"
 MODEL: 
   VISION: "vit_base_patch16_384"
   TEXT: "xlnet-base-cased"
