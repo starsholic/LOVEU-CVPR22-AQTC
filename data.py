@@ -14,31 +14,32 @@ class EncodedAssistQA(Dataset):
             for s in sample:
                 s["video"] = os.path.join(root, t, cfg.INPUT.VIDEO)
                 s["script"] = os.path.join(root, t, cfg.INPUT.SCRIPT)
-                s["paras"] = os.path.join(root, t, cfg.INPUT.PARA)
+                s["para"] = os.path.join(root, t, cfg.INPUT.PARA)
             samples.extend(sample)
         self.samples = samples
         
     def __getitem__(self, index):
         sample = self.samples[index]
         video = torch.load(sample["video"], map_location="cpu")
-        timestamps_script = torch.load(sample["script"], map_location="cpu")
-        sent_timestamps, script = timestamps_script
-        timestamps_paras = torch.load(sample['paras'], map_location="cpu")
-        para_timestamps, paras = timestamps_paras
+
+        timestamp_script = torch.load(sample["script"], map_location="cpu")
+        sents_timestamp, script = timestamp_script
+
+        timestamp_para = torch.load(sample['para'], map_location="cpu")
+        paras_timestamp, function_para = timestamp_para
+
         question = sample["question"]
         actions = sample["answers"]
         meta = {
             'question': sample['src_question'], 'folder': sample['folder'], 
-            'paras_score': sample['paras_score'], 'para_timestamps': para_timestamps, 
-            'sents_score': sample['sents_score'], 'sent_timestamps': sent_timestamps
+            'paras_score': sample['paras_score'], 'paras_timestamp': paras_timestamp, 
+            'sents_score': sample['sents_score'], 'sents_timestamp': sents_timestamp
         }
         if 'correct' in sample:
             label = torch.tensor(sample['correct']) - 1 # NOTE here, start from 1
         else:
             label = None
-        return video, script, question, paras, actions, label, meta
-        # return question, paras, actions, label, meta
-
+        return video, script, question, function_para, actions, label, meta
         
     def __len__(self, ):
         return len(self.samples)

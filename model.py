@@ -1,13 +1,7 @@
-
-from random import sample
 import torch, os, json
 from torch import nn
 from torch.functional import F
 from pytorch_lightning import LightningModule
-from pl_bolts.optimizers import LinearWarmupCosineAnnealingLR
-
-# from text_matching import enginering
-
 
 
 class MLP(nn.Module):
@@ -55,7 +49,7 @@ class Q2A(nn.Module):
         for video, script, question, para, actions, label, meta in batch:
             if self.function_centric:
                 # for visual
-                timestamps = meta['para_timestamps']
+                timestamps = meta['paras_timestamp']
                 video_func = []
                 for seg in timestamps:
                     if seg[0] >= seg[1]:
@@ -89,13 +83,13 @@ class Q2A(nn.Module):
                     qa_script, qa_script_mask = self.qa2s(
                         qa.unsqueeze(1), script_func.unsqueeze(1), script_func.unsqueeze(1)
                     )
-                    print('attention score:', qa_script_mask.mean(dim=1).squeeze(0).softmax(dim=0))
-                    print('tfidf score', torch.tensor(meta['paras_score']))
-                    print(meta['question'])
-                    with open(os.path.join('/data/wushiwei/data/assistq/assistq_test/test', meta['folder'], 'paras.json'), 'r') as f:
-                        paras = json.load(f)
-                    print(paras[1])
-
+                    # for visualization
+                    # print('attention score:', qa_script_mask.mean(dim=1).squeeze(0).softmax(dim=0))
+                    # print('tfidf score', torch.tensor(meta['paras_score']))
+                    # print(meta['question'])
+                    # with open(os.path.join('/data/wushiwei/data/assistq/assistq_test/test', meta['folder'], 'paras.json'), 'r') as f:
+                    #     paras = json.load(f)
+                    # print(paras[1])
                     qa_video = qa_script_mask @ video_func.view(-1, 768)
                     inputs = torch.cat(
                         [qa_video.view(A, -1), qa_script.view(A, -1), qa.view(A, -1), a_buttons.view(A, -1)],
@@ -136,7 +130,7 @@ class Q2A(nn.Module):
             return results
 
 
-class Q2A_para(nn.Module):
+class Q2A_Function(nn.Module):
     def __init__(self, cfg) -> None:
         super().__init__()
         self.mlp_v = MLP(cfg.INPUT.DIM, cfg.INPUT.DIM)
@@ -162,40 +156,29 @@ class Q2A_para(nn.Module):
         loss, count = 0, 0
         results = []
         for video, script, question, para, actions, label, meta in batch:
-            sent_score = torch.tensor(meta['sents_score']).softmax(dim=0).cuda()
-            para_score = torch.tensor(meta['paras_score']).softmax(dim=0).cuda()
-
-            video = self.mlp_v(video)
-
+            # for text
             if self.function_centric:
-                if meta['folder'] == 'vacuum_1csuz':
-                    video_para = video.mean(dim=0)
-                else:
-                    # video seg * tfidf score
-                    timestamps = meta['para_timestamps']
-                    video_para = []
-                    for seg in timestamps:
-                        video_para.append(video[seg[0]:seg[1]].mean(dim=0))
-                    video_para = torch.stack(video_para)
-                    video_para = torch.matmul(para_score, video_para)
-
-                # for para
+                score = torch.tensor(meta['paras_score']).softmax(dim=0).cuda()
+                timestamps = meta['paras_timestamp']
                 para = self.mlp_t(para)
-                para = torch.matmul(para_score, para)
+                para = torch.matmul(score, para)
             else:
-                timestamps = meta['sent_timestamps']
-                video_sent = []
-                for seg in timestamps:
-                    if seg[0] >= seg[1]:
-                        video_sent.append(video[seg[0]])
-                    else:
-                        video_sent.append(video[seg[0]:seg[1]].mean(dim=0))
-                video_sent = torch.stack(video_sent)
-                video_sent = torch.matmul(sent_score, video_sent)
-
-                # for sentence
+                score = torch.tensor(meta['sents_score']).softmax(dim=0).cuda()
+                timestamps = meta['sents_timestamp']
                 script = self.mlp_t(script)
-                script = torch.matmul(sent_score, script)
+                script = torch.matmul(score, script)
+            text_seg = para if self.function_centric else script
+
+            # for visual
+            video = self.mlp_v(video)
+            video_seg = []
+            for seg in timestamps:
+                if seg[0] >= seg[1]:
+                    video_seg.append(video[seg[0]])
+                else:
+                    video_seg.append(video[seg[0]:seg[1]].mean(dim=0))
+            video_seg = torch.stack(video_seg)
+            video_seg = torch.matmul(score, video_seg)
                 
             question = self.mlp_t(question)
             
@@ -210,16 +193,10 @@ class Q2A_para(nn.Module):
                 ).view(A, -1) 
                 qa = question + a_texts
 
-                if self.function_centric:
-                    inputs = torch.cat(
-                        [video_para.expand_as(qa), para.expand_as(qa), qa.view(A, -1), a_buttons.view(A, -1)],
-                        dim=1
-                    )
-                else:
-                    inputs = torch.cat(
-                        [video_sent.expand_as(qa), script.expand_as(qa), qa.view(A, -1), a_buttons.view(A, -1)],
-                        dim=1
-                    )
+                inputs = torch.cat(
+                    [video_seg.expand_as(qa), text_seg.expand_as(qa), qa.view(A, -1), a_buttons.view(A, -1)],
+                    dim=1
+                )
 
                 inputs = self.mlp_pre(inputs)
                 if hasattr(self, "gru"):
@@ -246,11 +223,12 @@ class Q2A_para(nn.Module):
             return results
 
 
-models = {"q2a": Q2A, "q2a_para": Q2A_para}
+models = {"q2a": Q2A, "q2a_function": Q2A_Function}
 
 class ModelModule(LightningModule):
     def __init__(self, cfg):
         super().__init__()
+        self.save_hyperparameters()
         self.model = models[cfg.MODEL.ARCH](cfg)
         self.cfg = cfg
     
@@ -264,46 +242,11 @@ class ModelModule(LightningModule):
         cfg = self.cfg
         model = self.model
         optimizer = torch.optim.Adam(model.parameters(), lr=cfg.SOLVER.LR)
-        # optimizer = torch.optim.SGD(model.parameters(), lr=cfg.SOLVER.LR,
-        #     momentum=0.9, weight_decay=0.0005) 
-        # lr_scheduler = LinearWarmupCosineAnnealingLR(optimizer, 
-        #     warmup_epochs=cfg.SOLVER.WARMUP_EPOCHS, max_epochs=cfg.SOLVER.MAX_EPOCHS, 
-        #     warmup_start_lr=cfg.SOLVER.LR*0.1)
-        # return [optimizer], [lr_scheduler]
         return [optimizer], []
     
     def validation_step(self, batch, idx):
         batched_results = self.model(batch)
         return batched_results
-    
-    # def validation_epoch_end(self, outputs) -> None:
-    #     scores, labels, metas = list(zip(*outputs))
-    #     scores = sum(scores, [])
-    #     labels = sum(labels, [])
-    #     metas = sum(metas, [])
-    #     if len(labels) > 0: # evaluation
-    #         recall_1, recall_3, mean_rank, mrr = [], [], [], []
-    #         for score, label in zip(scores, labels):
-    #             sorted_indices = score.sort(descending=True)[1]
-    #             mask = sorted_indices == label
-    #             recall_1.append(mask[0].float())
-    #             recall_3.append(mask[:3].float().sum())
-    #             mean_rank.append(mask.nonzero().squeeze_().float() + 1)
-    #             mrr.append(len(mask) / (mean_rank[-1]))
-    #         recall_1 = torch.stack(recall_1).mean()
-    #         recall_3 = torch.stack(recall_3).mean()
-    #         mean_rank = torch.stack(mean_rank).mean()
-    #         mrr = torch.stack(mrr).mean()
-    #         dataset = self.trainer.datamodule.__class__.__name__
-    #         self.log(f"{dataset} recall@1", recall_1, rank_zero_only=True)
-    #         self.log(f"{dataset} recall@3", recall_3, rank_zero_only=True)
-    #         self.log(f"{dataset} mean_rank", mean_rank, rank_zero_only=True)
-    #         self.log(f"{dataset} mrr", mrr)
-
-    #         print(f"{dataset} recall@1", recall_1)
-    #         print(f"{dataset} recall@3", recall_3)
-    #         print(f"{dataset} mean_rank", mean_rank)
-    #         print(f"{dataset} mrr", mrr)
         
     def validation_epoch_end(self, outputs) -> None:
         from eval_for_loveu_cvpr2022 import evaluate

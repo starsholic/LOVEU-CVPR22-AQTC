@@ -23,11 +23,11 @@ class Encoder(LightningModule):
         if self.for_video:
             video, path = batch[0] 
             # set smaller batch size to prevent OOM
-            # features = torch.cat([
-            #     self.vision_model(frame.unsqueeze(0))
-            #     for frame in video
-            # ])
-            features = self.vision_model(video)
+            features = torch.cat([
+                self.vision_model(frame.unsqueeze(0))
+                for frame in video
+            ])
+            # features = self.vision_model(video)
             if not os.path.exists(path):
                 os.makedirs(path)
             torch.save(features, os.path.join(path, "video.pth"))

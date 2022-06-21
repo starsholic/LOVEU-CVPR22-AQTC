@@ -1,6 +1,4 @@
-from random import sample
-import numpy as np
-import os, json, pandas
+import os, json
 from PIL import Image
 import torch
 import torchvision
@@ -11,7 +9,6 @@ from pytorch_lightning import LightningDataModule
 
 import timm
 from timm.data import resolve_data_config
-from timm.data.transforms_factory import create_transform
 
 # unused
 def to_seconds(s):

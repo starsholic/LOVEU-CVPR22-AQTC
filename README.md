@@ -1,4 +1,4 @@
-## Winning the CVPR'22 LOVEU-AQTC challenge: 
+## Winning the CVPR'22 LOVEU-AQTC challenge 
 
 ### A Two-stage Function-centric Approach
 
@@ -37,7 +37,7 @@ Then carefully set your data path in the config file ;)
 
 ## Encoding
 
-Before starting, you should encode the instructional videos, scripts, paras, QAs. See [encoder.md](https://github.com/showlab/Q2A/blob/master/encoder/README.md).
+Before starting, you should encode the instructional videos, scripts, function-paras, QAs. See [encoder.md](https://github.com/starsholic/LOVEU-CVPR22-AQTC/tree/main/encoder).
 
 ## Training & Evaluation
 
@@ -60,7 +60,7 @@ The evaluation will be performed after each epoch. You can use Tensorboard, or j
 
 | Model                                                        | Recall@1 ↑ | Recall@3 ↑ | MR (Mean Rank) ↓ | MRR (Mean Reciprocal Rank) ↑ |
 | ------------------------------------------------------------ | ---------- | ---------- | ---------------- | ---------------------------- |
-| Function-centric ([configs/q2a_vit_xlnet.yaml](configs/q2a_cit_xlnet.yaml)) | 44.8       | 75.4       | 2.6              | 3.9                          |
+| Function-centric ([configs/q2a_vit_xlnet.yaml](configs/q2a_vit_xlnet.yaml)) | 44.8       | 75.4       | 2.6              | 3.9                          |
 
 We obtained better results after the competition deadline as shown above.
 

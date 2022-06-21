@@ -19,27 +19,29 @@ python get_tfidf_score.py
 For video encoding, 
 
 ```
-python main.py --cfg configs/vit_xlnet.yaml FOR.VIDEO True DATASET.SPLIT "train" DATASET.ROOT "/data/wushiwei/data/assistq/assistq_train" DATASET.LABEL "train_with_score.json"
-python main.py --cfg configs/vit_xlnet.yaml FOR.VIDEO True DATASET.SPLIT "test" DATASET.ROOT "/data/wushiwei/data/assistq/assistq_test" DATASET.LABEL "test_without_gt_with_score.json"
+python main.py --cfg configs/vit_xlnet.yaml FOR.VIDEO True DATASET.SPLIT "train" DATASET.LABEL "train_with_score.json"
+python main.py --cfg configs/vit_xlnet.yaml FOR.VIDEO True DATASET.SPLIT "test" DATASET.LABEL "test_without_gt_with_score.json"
 ```
 
 For script encoding, 
 
 ```
-python main.py --cfg configs/vit_xlnet.yaml FOR.SCRIPT True DATASET.SPLIT "train" DATASET.LABEL "train_with_score.json" DATASET.ROOT "/data/wushiwei/data/assistq/assistq_train"
-python main.py --cfg configs/vit_xlnet.yaml FOR.SCRIPT True DATASET.SPLIT "test" DATASET.LABEL "test_without_gt_with_score.json" DATASET.ROOT "/data/wushiwei/data/assistq/assistq_test"
+python main.py --cfg configs/vit_xlnet.yaml FOR.SCRIPT True DATASET.SPLIT "train" DATASET.LABEL "train_with_score.json"
+python main.py --cfg configs/vit_xlnet.yaml FOR.SCRIPT True DATASET.SPLIT "test" DATASET.LABEL "test_without_gt_with_score.json"
 ```
 
 For function-para encoding,
 
 ```
-python main.py --cfg configs/vit_xlnet.yaml FOR.PARA True DATASET.SPLIT "train" DATASET.LABEL "train_with_score.json" DATASET.ROOT "/data/wushiwei/data/assistq/assistq_train"
-python main.py --cfg configs/vit_xlnet.yaml FOR.PARA True DATASET.SPLIT "test" DATASET.LABEL "test_without_gt_with_score.json" DATASET.ROOT "/data/wushiwei/data/assistq/assistq_test"
+python main.py --cfg configs/vit_xlnet.yaml FOR.PARA True DATASET.SPLIT "train" DATASET.LABEL "train_with_score.json"
+python main.py --cfg configs/vit_xlnet.yaml FOR.PARA True DATASET.SPLIT "test" DATASET.LABEL "test_without_gt_with_score.json"
 ```
 
 For QA encoding,
 
 ```
-python main.py --cfg configs/vit_xlnet.yaml FOR.QA True DATASET.SPLIT "train" DATASET.LABEL "train_with_score.json" DATASET.ROOT "/data/wushiwei/data/assistq/assistq_train"
-python main.py --cfg configs/vit_xlnet.yaml FOR.QA True DATASET.SPLIT "test" DATASET.LABEL "test_without_gt_with_score.json" DATASET.ROOT "/data/wushiwei/data/assistq/assistq_test"
+python main.py --cfg configs/vit_xlnet.yaml FOR.QA True DATASET.SPLIT "train" DATASET.LABEL "train_with_score.json"
+python main.py --cfg configs/vit_xlnet.yaml FOR.QA True DATASET.SPLIT "test" DATASET.LABEL "test_without_gt_with_score.json"
 ```
+
+4. Make sure each sample in encoder/outputs has video, script, function_para and QAs embedding:)

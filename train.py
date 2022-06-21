@@ -11,13 +11,18 @@ if __name__ == "__main__":
     cfg = build_config()
     dataset = build_data(cfg)
     model = build_model(cfg)
+    checkpoint_callback = ModelCheckpoint(
+        save_top_k=10,
+        monitor= "EncodedAssistQADataModule recall@1",
+        mode='max'
+    )
     trainer = Trainer(
         gpus=cfg.NUM_GPUS, 
         accelerator="gpu",
-        strategy=DDPPlugin(find_unused_parameters=True),
+        strategy=DDPPlugin(find_unused_parameters=False),
         callbacks=[
             LearningRateMonitor(logging_interval='step'), 
-            ModelCheckpoint()
+            checkpoint_callback
         ],
         benchmark=False, 
         deterministic=True,
