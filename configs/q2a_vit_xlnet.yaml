@@ -1,7 +1,7 @@
 DATASET: 
   TRAIN: 'encoder/outputs/vit_xlnet/train'
   VAL: 'encoder/outputs/vit_xlnet/test'
-  GT: '/data/wushiwei/data/assistq/assistq_test/test_with_gt.json'
+  GT: ''
 DATALOADER:
   NUM_WORKERS: 4
 INPUT:
