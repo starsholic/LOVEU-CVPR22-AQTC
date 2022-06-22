@@ -70,7 +70,7 @@ We obtained better results after the competition deadline as shown below.
 | Model                                                        | Recall@1 ↑  | Recall@3 ↑  | MR (Mean Rank) ↓ | MRR (Mean Reciprocal Rank) ↑ |
 | ------------------------------------------------------------ | ----------- | ----------- | ---------------- | ---------------------------- |
 | Q2A(baseline) ([configs/q2a_gru+fps1+maskx-1_vit_b16+bert_b.yaml](https://github.com/showlab/Q2A/blob/master/configs/q2a_gru+fps1+maskx-1_vit_b16+bert_b.yaml)) | 30.2        | 62.4        | 3.2              | 3.2                          |
-| Function-centric ([configs/q2a_vit_xlnet.yaml](configs/q2a_vit_xlnet.yaml)) | 44.8(+14.6) | 75.4(+13.0) | 2.60(+0.6)        | 3.87(+0.67)                    |
+| Function-centric ([configs/q2a_vit_xlnet.yaml](configs/q2a_vit_xlnet.yaml)) | 45.2(+15.0) | 75.4(+13.0) | 2.60(+0.6)        | 3.87(+0.67)                    |
 
 ## Contact
 
