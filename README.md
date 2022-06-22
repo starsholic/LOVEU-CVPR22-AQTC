@@ -4,13 +4,13 @@
 
 This repo provides the **1st place** solution(code and checkpoint) of the CVPR'22 LOVEU-AQTC challenge.
 
-[[Challenge Page]](https://showlab.github.io/assistq/)  [[Challenge Paper]](https://arxiv.org/abs/2203.04203)  [[Our paper]]() [[LOVEU@CVPR'22 Challenge]](https://sites.google.com/view/loveucvpr22/track-3?authuser=0) [[CodaLab Leaderboard]](https://codalab.lisn.upsaclay.fr/competitions/4642#results)
+[[Challenge Page]](https://showlab.github.io/assistq/)  [[Challenge Paper]](https://arxiv.org/abs/2203.04203)  [[Our paper]](https://arxiv.org/abs/2206.09597) [[LOVEU@CVPR'22 Challenge]](https://sites.google.com/view/loveucvpr22/track-3?authuser=0) [[CodaLab Leaderboard]](https://codalab.lisn.upsaclay.fr/competitions/4642#results)
 
 Click to know the task:
 
 [![Click to see the demo](https://img.youtube.com/vi/3v8ceel9Mos/0.jpg)](https://www.youtube.com/watch?v=3v8ceel9Mos)
 
-Model Architecture (see [[Our Paper]]() for details):
+Model Architecture (see [[Our Paper]](https://arxiv.org/abs/2206.09597) for details):
 
 ![image-20220619201014430](https://raw.githubusercontent.com/starsholic/pic/main/image-20220619201014430.png)
 
